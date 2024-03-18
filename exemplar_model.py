@@ -263,7 +263,7 @@ def update_discr_plot(delta, intermediate_data, switch_on):
 
     x = np.linspace(0, xmax, 1000)
 
-    fig = px.line(x=x, y=discriminability(x, delta))
+    fig = px.line(x=x, y=discriminability(x, delta), range_y=(-.05, 1.05))
     fig.add_trace(go.Scatter(
         x=[ratio], y=[discr], marker=dict(size=12), hoverinfo='text',
         hovertext=f'ratio: {round(ratio, 3)}, p: {round(discr, 3)}'))
@@ -294,7 +294,7 @@ def update_typ_plot(tau, intermediate_data, switch_on):
     typ = typicality(avg_activation, tau)
 
     x = np.linspace(0, 1, 100)
-    fig = px.line(x=x, y=typicality(x, tau))
+    fig = px.line(x=x, y=typicality(x, tau), range_y=(-.05, 1.05))
     fig.add_trace(go.Scatter(x=[avg_activation],
                   y=[typ], marker=dict(size=12), hoverinfo='text',
                   hovertext=f'avg activation: {round(avg_activation, 3)}, p: {round(typ, 3)}'))
