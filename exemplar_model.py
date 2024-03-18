@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, Output, Input, callback, Patch, clientside_callback
+from dash import Dash, html, dcc, Output, Input, callback, Patch, clientside_callback, State
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
 
@@ -10,11 +10,11 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 import json
-from utils import activation, discriminability, typicality
+from utils import activation, discriminability, typicality, map_delta_freq
 
 
 HEIGHT = 540
-THEME = 'pulse'
+THEME = 'bootstrap'
 
 
 data = pd.read_csv('data.csv')
@@ -87,13 +87,16 @@ param_controls = dbc.Col([
 
     html.Hr(),
 
+    dbc.Switch(id='freq_switch', value=False,
+               persistence=False, label='vary δ with type frequency'),
 
     html.Div([
         dbc.Label('type frequency', html_for='freq_input'),
         freq_input,
-    ], className='mb-2'),
+    ], className='mb-2', hidden=True, id='freq_group'),
 
-], width=2)
+
+], width=3)
 
 
 # Application layout
@@ -107,7 +110,7 @@ app.layout = dbc.Container([
 
         dbc.Col([
             activation_plot
-        ], width=7),
+        ], width=6),
         dbc.Col([
             activation_barplot,
         ], width=3, align='end'),
@@ -270,7 +273,8 @@ def update_discr_plot(delta, intermediate_data, switch_on):
 
     fig.update_layout(
         height=0.6 * HEIGHT,
-        title=f'Probability of passing discriminability evaluation: <b>{round(discr, 3)}</b>',
+        title=f'Probability of passing discriminability evaluation: <b>{
+            round(discr, 3)}</b>',
         showlegend=False,
         uirevision='stay there',
         template=get_template(switch_on)
@@ -299,13 +303,29 @@ def update_typ_plot(tau, intermediate_data, switch_on):
 
     fig.update_layout(
         height=0.6*HEIGHT,
-        title=f'Probability of passing typicality evaluation: <b>{round(typ, 3)}</b>',
+        title=f'Probability of passing typicality evaluation: <b>{
+            round(typ, 3)}</b>',
         showlegend=False,
         uirevision='stay there',
         template=get_template(switch_on)
     )
 
     return fig
+
+
+@callback(
+    Output('freq_group', 'hidden'),
+    Output('delta_input', 'value'),
+    Output('delta_input', 'disabled'),
+    Input('freq_switch', 'value'),
+    Input('freq_input', 'value'),
+    prevent_initial_call=True
+)
+def update_freq_group(switch_on, freq):
+
+    delta = map_delta_freq[freq] if switch_on else .5
+
+    return not switch_on, delta, switch_on
 
 
 if __name__ == '__main__':
