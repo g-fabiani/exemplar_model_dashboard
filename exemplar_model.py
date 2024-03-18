@@ -175,7 +175,7 @@ def update_activation_window_plot(alpha, clickdata, switch_on):
         category_data = data[data['category'] == category]
         fig.add_trace(go.Box(x=category_data['value'],
                              boxpoints='all',
-                             jitter=0.9,
+                             jitter=1,
                              hoveron='points',
                              pointpos=0,
                              showlegend=False,
@@ -183,7 +183,7 @@ def update_activation_window_plot(alpha, clickdata, switch_on):
                              line=dict(width=0),
                              fillcolor='rgba(255,255,255,0)',
                              marker=dict(opacity=0.5),
-                             hovertext=round(category_data['value'], 2),
+                             hovertext=category_data['value'],
                              hoverinfo='text'
                              ),
                       row=2, col=1)
