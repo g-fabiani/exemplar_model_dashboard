@@ -62,7 +62,7 @@ alpha_input = dbc.Input(id='alpha_input', type='number',
 delta_input = dbc.Input(id='delta_input', type='number',
                         min=0.25, max=1, step=.05, value=.5)
 tau_input = dbc.Input(id='tau_input', type='number',
-                      min=0.1, max=0.5, step=0.1, value=.1)
+                      min=0.1, max=0.3, step=0.1, value=.1)
 freq_input = dbc.Input(id='freq_input', type='number',
                        min=1, max=12, step=1, value=6)
 
@@ -187,6 +187,18 @@ def update_activation_window_plot(alpha, clickdata, switch_on):
                              hoverinfo='text'
                              ),
                       row=2, col=1)
+
+    # Create trace for activation function
+    fig.add_trace(
+        go.Scatter(x=x, y=activation(x, point, alpha),
+                   mode='lines', showlegend=False, name='activation'), row=1, col=1
+    )
+    fig.update_layout(
+        height=HEIGHT,
+        uirevision='stay there',
+        template=get_template(switch_on)
+    )
+
     fig.add_trace(
         go.Box(x=[point],
                name="Token",
@@ -199,17 +211,6 @@ def update_activation_window_plot(alpha, clickdata, switch_on):
                marker=dict(size=14, symbol='star')
                ),
         row=2, col=1)
-
-    # Create trace for activation function
-    fig.add_trace(
-        go.Scatter(x=x, y=activation(x, point, alpha),
-                   mode='lines', showlegend=False, name='activation'), row=1, col=1
-    )
-    fig.update_layout(
-        height=HEIGHT,
-        uirevision='stay there',
-        template=get_template(switch_on)
-    )
 
     return fig
 
@@ -259,11 +260,12 @@ def update_discr_plot(delta, intermediate_data, switch_on):
     ratio = json.loads(intermediate_data)['ratio']
     discr = discriminability(ratio, delta)
 
-    xmax = ratio + 10 if ratio < 300 else ratio + ratio * .1
+    xmax = 12 if ratio < 12 else ratio + ratio * .1
 
     x = np.linspace(0, xmax, 1000)
 
-    fig = px.line(x=x, y=discriminability(x, delta), range_y=(-.05, 1.05))
+    fig = px.line(x=x, y=discriminability(x, delta),
+                  range_y=(-.05, 1.05))
     fig.add_trace(go.Scatter(
         x=[ratio], y=[discr], marker=dict(size=12), hoverinfo='text',
         hovertext=f'ratio: {round(ratio, 3)}, p: {round(discr, 3)}'))
@@ -298,7 +300,7 @@ def update_typ_plot(tau, intermediate_data, switch_on):
     fig.add_trace(go.Scatter(x=[avg_activation],
                   y=[typ], marker=dict(size=12), hoverinfo='text',
                   hovertext=f'avg activation: {round(avg_activation, 3)}, p: {round(typ, 3)}'))
-    fig.update_xaxes(title='average exemplar activation')
+    fig.update_xaxes(title='average exemplar activation', range=(-.05, 1))
     fig.update_yaxes(title='')
 
     fig.update_layout(
