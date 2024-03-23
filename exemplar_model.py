@@ -123,7 +123,13 @@ app.layout = dbc.Container([
         dbc.Col([
             typ_plot,
         ], width=6)
-    ])
+    ]),
+
+    html.Footer(
+        html.A("https://github.com/g-fabiani/exemplar_model_dashboard",
+               href="https://github.com/g-fabiani/exemplar_model_dashboard")
+    )
+
 ], fluid=True, className='dbc')
 
 
@@ -138,6 +144,12 @@ app.layout = dbc.Container([
     prevent_initial_call=True
 )
 def update_figure_template(switch_on):
+    """
+    Update template of all figures when the color mode switch
+    is switched w/o having to re-draw the figures from scratch.
+    Makes the switching between dark and light mode faster.
+    """
+
     patched_figure = Patch()
     patched_figure['layout']['template'] = get_template(switch_on)
 
@@ -163,7 +175,12 @@ clientside_callback(
     Input('color-mode-switch', 'value')
 )
 def update_activation_window_plot(alpha, clickdata, switch_on):
-    x = np.linspace(-3.5, 1.5, 100)
+    """
+    Update activation window plot and exemplar space plot when
+    a new alpha value or a new token is set.
+    """
+
+    x = np.linspace(-3.5, 1.7, 105)
 
     point = clickdata['points'][0]['x']
 
@@ -199,6 +216,7 @@ def update_activation_window_plot(alpha, clickdata, switch_on):
         template=get_template(switch_on)
     )
 
+    # Create trace for plotting token
     fig.add_trace(
         go.Box(x=[point],
                name="Token",
@@ -223,6 +241,11 @@ def update_activation_window_plot(alpha, clickdata, switch_on):
     Input('color-mode-switch', 'value')
 )
 def update_activation_barplot(alpha, clickdata, switch_on):
+    """
+    Update total activation barplot when a new activation
+    window function is plotted.
+    Store aggregated data in Store.
+    """
 
     point = clickdata['points'][0]['x']
 
@@ -257,6 +280,15 @@ def update_activation_barplot(alpha, clickdata, switch_on):
     Input('color-mode-switch', 'value')
 )
 def update_discr_plot(delta, intermediate_data, switch_on):
+    """
+    Update discriminability plot.
+    This does three things:
+    - plot the discriminabilty curve depending on the discriminability threshold
+    - plot a point on the curve with x corresponding to the ratio between
+        the intended category activation and the residual activation
+    - update the resulting probability in the title of the plot
+    """
+
     ratio = json.loads(intermediate_data)['ratio']
     discr = discriminability(ratio, delta)
 
@@ -292,6 +324,15 @@ def update_discr_plot(delta, intermediate_data, switch_on):
     Input('color-mode-switch', 'value')
 )
 def update_typ_plot(tau, intermediate_data, switch_on):
+    """
+    Update the typicality plot.
+    This does three things:
+    - plot the typicality curve depending on the typicality threshold
+    - plot a point on the curve with x corresponding to the average activation
+       of the intended category for the token
+    - update the resulting probability in the title of the plot
+    """
+
     avg_activation = json.loads(intermediate_data)['avg_activation']
     typ = typicality(avg_activation, tau)
 
