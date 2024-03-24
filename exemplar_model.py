@@ -41,9 +41,11 @@ app = Dash(__name__, external_stylesheets=[
 # Plots
 activation_plot = dcc.Graph(
     id='activation_plot', clickData={'points': [{'x': 0}]})
-activation_barplot = dcc.Graph(id='activation_barplot')
-discr_plot = dcc.Graph(id='discr_plot')
-typ_plot = dcc.Graph(id='typ_plot')
+activation_barplot = dcc.Graph(
+    id='activation_barplot',
+    config=dict(displayModeBar=False))
+discr_plot = dcc.Graph(id='discr_plot', config=dict(displayModeBar=False))
+typ_plot = dcc.Graph(id='typ_plot', config=dict(displayModeBar=False))
 
 # Controls
 color_mode_switch = html.Span(
@@ -210,11 +212,6 @@ def update_activation_window_plot(alpha, clickdata, switch_on):
         go.Scatter(x=x, y=activation(x, point, alpha),
                    mode='lines', showlegend=False, name='activation'), row=1, col=1
     )
-    fig.update_layout(
-        height=HEIGHT,
-        uirevision='stay there',
-        template=get_template(switch_on)
-    )
 
     # Create trace for plotting token
     fig.add_trace(
@@ -229,6 +226,12 @@ def update_activation_window_plot(alpha, clickdata, switch_on):
                marker=dict(size=14, symbol='star')
                ),
         row=2, col=1)
+
+    fig.update_layout(
+        height=HEIGHT,
+        uirevision='stay there',
+        template=get_template(switch_on)
+    )
 
     return fig
 
